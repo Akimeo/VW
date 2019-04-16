@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block content %}
+	<h1>Список пользователей дневника</h1>
+	{% for item in users %}
+     	<div>Пользователь: {{item["user"]}}. Количество новостей: {{item["news"]}}</div>
+	{% endfor %}
+{% endblock %}
