@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+	<h1>Новости пользователя {{ session["username"] }}</h1>
+	{% for item in news %}
+    <div class="alert alert-dark" role="alert">
+        <h2>{{item.title}}</h2>
+        <div>{{item.content}}</div>
+        <a href="/delete_news/{{item.id}}">Удалить новость</a>
+    </div>
+	{% endfor %}
+{% endblock %}
