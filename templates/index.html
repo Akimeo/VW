@@ -14,12 +14,16 @@
 	  <button type="submit" class="btn btn-primary btn-sm" name="reversed" value="1">Обратный порядок</button>
 	  {% endif %}
   </form>
-  <a href="/add_news">Добавить новость</a>
+  <form action="/news" method="post">
+    <button type="submit"class="btn-link">Добавить новость</button>
+  </form>
 	{% for item in news %}
     <div class="alert alert-dark" role="alert">
         <h2>{{item.title}}</h2>
         <div>{{item.content}}</div>
-        <a href="/delete_news/{{item.id}}">Удалить новость</a>
-    </div>
+		  <form action="/news/{{item.id}}?method=delete" method="post">
+		    <button type="submit"class="btn-link">Удалить новость</button>
+		  </form>
+    	</div>
 	{% endfor %}
 {% endblock %}
