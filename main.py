@@ -238,6 +238,7 @@ class NewsList(Resource):
 class Login(Resource):
     def get(self):
         global loginform
+        loginform = LoginForm()
         self.form = loginform
         return make_response(render_template('login.html', form=self.form,
                                              title='Авторизация'))
