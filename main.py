@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, make_response
+from flask import Flask, jsonify, make_response, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import reqparse, abort, Api, Resource
 
@@ -79,12 +79,11 @@ class News(Resource):
 
 class NewsList(Resource):
     def get(self):
-        news = {}
-        for item in NewsModel.query.all():
-            news[item.id] = {'title': item.title,
-                             'content': item.content,
-                             'user_id': item.user_id}
-        return jsonify({'news': news})
+        headers = {'Content-Type': 'text/html'}
+        return make_response(
+            render_template('index.html', title='ВВаркрафте',
+                            username='admin', news=NewsModel.query.all()),
+            200, headers)
 
     def post(self):
         args = news_parser.parse_args()

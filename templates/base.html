@@ -4,46 +4,46 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <title>{{ title }}</title>
+    <title>{{title}}</title>
 </head>
-    <body background="static/img/background.png">
-      <div class="header">
-      <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <img src="static/img/LOGO.png">
-        <a class="navbar-brand" href="#">Zaicol Book</a>
-        <div class="collapse navbar-collapse">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-                <a class="nav-link" href="/index">Главная<span class="sr-only">(current)</span></a>
-            </li>
-            <li class="nav-item active">
-                <a class="nav-link" href="/news">Новости<span class="sr-only">(current)</span></a>
-            </li>
-        </ul>
-        <ul class="navbar-nav ml-auto">
-            <li class="nav-item active">
-                {% if "username" in session %}
-                    {% if session["username"] == "admin" %}
-                        <a class="nav-link" href="/shutdown">Выключение<span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="nav-item active">
-                        <a class="nav-link" href="/user_list">Список пользователей<span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="nav-item active">
-                    {% endif %}
-                    <a class="nav-link" href="/logout">{{session['username']}}<span class="sr-only">(current)</span></a>
-                {% else %}
-                    <a class="nav-link" href="/register">Регистрация<span class="sr-only">(current)</span></a>
-                    <a class="nav-link" href="/login">Авторизация<span class="sr-only">(current)</span></a>
-                {% endif %}
-            </li>
-        </ul>
-        </div>
-      </nav>
-    </div>
+  <body>
+    <header>
+	<!--
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+			<a class="navbar-brand" href="/index">ВВаркрафте</a>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				{% if "username" in session %}
+					{% if session['username'] == 'admin' %}
+						<ul class="navbar-nav mr-auto">
+						<li class="nav-item">
+							<a class="nav-link" href="/admin">Секретная страница</a>
+						</li>
+						</ul>
+					{% endif %}
+					<ul class="navbar-nav ml-auto">
+					<li class="nav-item active">
+						<a class="nav-link" href="#">{{session['username']}}</a>
+					</li>
+					<li class="nav-item active">
+						<a class="nav-link" href="/logout">Выход</a>
+					</li>
+					</ul>
+				{% else %}
+					<ul class="navbar-nav ml-auto">
+					<li class="nav-item active">
+						<a class="nav-link" href="/registration">Регистрация</a>
+					</li>
+					</ul>
+				{% endif %}
+			</div>
+		</nav>
+		-->
+    </header>
     <!-- Begin page content -->
     <main role="main" class="container">
-        {% block content %}{% endblock %}
+		<p>
+			{% block content %}{% endblock %}
+		</p>
     </main>
-    </body>
+  </body>
 </html>
