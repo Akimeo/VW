@@ -237,23 +237,24 @@ class NewsList(Resource):
 
 class Login(Resource):
     def get(self):
-        global loginform
-        loginform = LoginForm()
-        self.form = loginform
-        return make_response(render_template('login.html', form=self.form,
-                                             title='Авторизация'))
+        global ssn
+        ssn["loginform"] = LoginForm()
+        print(ssn)
+        return make_response(render_template('login.html',
+                                             form=ssn["loginform"],
+                                             title='Авторизация'), 200)
 
     def post(self):
-        global loginform
-        form = loginform
+        print(ssn)
+        form = ssn["loginform"]
         user_name = form.username.data
         password = form.password.data
-        user_pass = UsersModel.query.filter_by(username=user_name).first()
+        user_pass = UsersModel.query.filter_by(user_name=user_name).first()
         if user_pass and user_pass.password == password:
             session['username'] = user_name
             session['user_id'] = user_pass.id
             session['remember'] = form.remember_me.data
-        return redirect('/index')
+        return make_response(redirect('/index'), 200)
 
 
 class Logout(Resource):
@@ -270,7 +271,7 @@ def not_found(error):
 
 
 if __name__ == '__main__':
-    loginform = LoginForm()
+    ssn = {}
     api.add_resource(NewsList_API, '/api/news')
     api.add_resource(News_API, '/api/news/<int:news_id>')
     api.add_resource(UsersList_API, '/api/users')
