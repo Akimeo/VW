@@ -9,7 +9,11 @@
     <body background="static/img/background.png">
       <div class="header">
       <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <img src="static/img/LOGO.png">
+        {% if session["logo"] %}
+        <img src="static/img/{{session["logo"]}}_logo.png" width="64" height="64">
+        {% else %}
+        <img src="static/img/D_logo.png" width="64" height="64">
+        {% endif %}
         <a class="navbar-brand" href="#">Zaicol Book</a>
         <div class="collapse navbar-collapse">
         <ul class="navbar-nav mr-auto">
@@ -31,7 +35,13 @@
                     </li>
                     <li class="nav-item active">
                     {% endif %}
-                    <a class="nav-link" href="/logout">{{session['username']}}<span class="sr-only">(current)</span></a>
+                    <li class="nav-item active">
+                        <img src={{ session["pic"] }} width="64" height="64">
+                    </li>
+                    <li class="nav-item active">
+                    <a class="nav-link" href="/{{session["user_id"]}}">{{session['username']}}<span class="sr-only">(current)</span></a></li>
+                    <li class="nav-item active">
+                    <a class="nav-link" href="/logout">Выход<span class="sr-only">(current)</span></a></li>
                 {% else %}
                     <a class="nav-link" href="/register">Регистрация<span class="sr-only">(current)</span></a>
                     <a class="nav-link" href="/login">Авторизация<span class="sr-only">(current)</span></a>

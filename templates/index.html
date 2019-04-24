@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Добро пожаловать. Снова.</h1>
+	  {% if session["news_sort_type"]%}
+	  <a href="/sort_news/id">
+	  <button type="submit" class="btn btn-primary btn-sm">Отсортировать по алфавиту</button></a>
+	  {% else %}
+	  <a href="/sort_news/title">
+	  <button type="submit" class="btn btn-primary btn-sm">Отсортировать по дате</button></a>
+	  {% endif %}
+	  {% if session["reverse"]%}
+	  <a href="/sort_news/straight">
+	  <button type="submit" class="btn btn-primary btn-sm">Сортировать по возрастанию</button></a>
+	  {% else %}
+	  <a href="/sort_news/reverse">
+	  <button type="submit" class="btn btn-primary btn-sm">Сортировать по убыванию</button></a>
+	  {% endif %}
+  <a href="/add_news">Добавить новость</a>
+	{% for item in news %}
+    <div class="alert alert-dark" role="alert">
+        <h2>{{item.title}}</h2>
+        <div>{{item.content}}</div>
+        <a href="/delete_news/{{item.id}}">Удалить новость</a>
+    </div>
+	{% endfor %}
+{% endblock %}

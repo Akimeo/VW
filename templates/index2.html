@@ -1,29 +1,23 @@
 {% extends "base.html" %}
-
+ 
 {% block content %}
-  <h1>Добро пожаловать. Снова.</h1>
-  <form action="" method="post">
-	  {% if session["sort_time"] %}
-	  <button type="submit" class="btn btn-primary btn-sm" name="sort_met" value="0">Сортировка по алфавиту</button>
-	  {% else %}
-	  <button type="submit" class="btn btn-primary btn-sm" name="sort_met" value="1">Сортировка по дате</button>
-	  {% endif %}
-	  {% if session["reverse"] %}
-	  <button type="submit" class="btn btn-primary btn-sm" name="reversed" value="0">Прямой порядок</button>
-	  {% else %}
-	  <button type="submit" class="btn btn-primary btn-sm" name="reversed" value="1">Обратный порядок</button>
-	  {% endif %}
-  </form>
-  <form action="/news" method="post">
-    <button type="submit"class="btn-link">Добавить новость</button>
-  </form>
+    <meta http-equiv="refresh" content="5" >
+	<div class="row">
+		<div class="col-sm">
+			<a href="/add_news">Добавить новость</a>
+		</div>
+		<div class="col-sm">
+			<a href="/sort_news/title">Отсортировать по алфавиту</a>
+		</div>
+		<div class="col-sm">
+			<a href="/sort_news/id">Отсортировать по дате</a>
+		</div>
+	</div>
 	{% for item in news %}
-    <div class="alert alert-dark" role="alert">
-        <h2>{{item.title}}</h2>
-        <div>{{item.content}}</div>
-		  <form action="/news/{{item.id}}?method=delete" method="post">
-		    <button type="submit"class="btn-link">Удалить новость</button>
-		  </form>
-    	</div>
+		<div class="alert alert-dark" role="alert">
+			<h2>{{item.title}}</h2>
+			<div>{{item.content}}</div>
+			<a href="/delete_news/{{item.id}}">Удалить новость</a>
+		</div>
 	{% endfor %}
 {% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+ 
+{% block content %}
+	<p class="font-weight-bold">Дата: {{data[0]["date"]}}</p>
+	<p class="font-weight-bold">Средняя температура: {{data[0]["temp"]}}</p>
+	<p class="font-weight-bold">Среднее давление: {{data[0]["pressure"]}}</p>
+	<table class="table table-bordered">
+		<thead align="center">
+			<tr>
+				<th scope="col">#</th>
+				<th scope="col">0:00</th>
+				<th scope="col">3:00</th>
+				<th scope="col">6:00</th>
+				<th scope="col">9:00</th>
+				<th scope="col">12:00</th>
+				<th scope="col">15:00</th>
+				<th scope="col">18:00</th>
+				<th scope="col">21:00</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<th scope="row">Температура</th>
+				{% for item in data[0]["hours"] %}
+					<td class="text-center">{{item["temp"]}}</td>
+				{% endfor %}
+			</tr>
+			<tr>
+				<th scope="row">Влажность</th>
+				{% for item in data[0]["hours"] %}
+					<td class="text-center">{{item["humid"]}}</td>
+				{% endfor %}
+			</tr>
+			<tr>
+				<th scope="row">Давление</th>
+				{% for item in data[0]["hours"] %}
+					<td class="text-center">{{item["pressure"]}}</td>
+				{% endfor %}
+			</tr>
+			<tr>
+				<th scope="row">Описание</th>
+				{% for item in data[0]["hours"] %}
+					<td class="text-center">{{item["desc"]}}</td>
+				{% endfor %}
+			</tr>
+			<tr>
+				<th scope="row">Ощущается как</th>
+				{% for item in data[0]["hours"] %}
+					<td class="text-center">{{item["feel"]}}</td>
+				{% endfor %}
+			</tr>
+		</tbody>
+	</table>
+{% endblock %}

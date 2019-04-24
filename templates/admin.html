@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+ 
+{% block content %}
+	<table class="table table-bordered">
+		<thead align="center">
+			<tr>
+				<th scope="col">Пользователь</th>
+				<th scope="col">Количество публикаций</th>
+			</tr>
+		</thead>
+		<tbody>
+		    {% for item in data %}
+			    <tr>
+					<td class="text-center">{{item[0]}}</td>
+					<td class="text-center">{{item[1]}}</td>
+			    </tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}
