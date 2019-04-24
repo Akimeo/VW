@@ -5,18 +5,6 @@ from add_news import AddNewsForm
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired, ValidationError
-import logging
-
-logging.basicConfig(level=logging.DEBUG)
-
-
-def log():
-
-    logging.debug('Debug')
-    logging.info('Info')
-    logging.warning('Warning')
-    logging.error('Error')
-    logging.critical('Critical or Fatal')
 
 
 def user_check(form, field):

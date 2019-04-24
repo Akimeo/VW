@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+ 
+{% block content %}
+	<form action="" method="post" novalidate>
+		<p>
+			<label for="selectTimePeriod">Выберите временной промежуток</label>
+			<select class="form-control" id="selectTimePeriod" name="time">
+				<option>на завтра</option>
+				<option>на 3 дня</option>
+				<option>на неделю</option>
+				<option>на месяц</option>
+			</select>
+			</p>
+			<p>
+			<button type="submit" class="btn btn-primary">Отправить</button>
+		</p>
+	</form>
+{% endblock %}
