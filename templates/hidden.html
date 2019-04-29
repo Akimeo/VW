@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+	<h1>Спрятанные сообщения</h1>
+	<h6>Всего спрятано: {{ lenNews }}</h6>
+	<style>
+		.indexButton{
+			margin: 10px 0px;
+		}
+	</style>
+	<div class="note">Примечание: все удалённые их авторами новости также удаляются и здесь.</div>
+	<div class="indexButton" align="center">
+		{% if session["news_sort_type"]%}
+			<a href="/sort_news/id" title="Отсортировать по алфавиту">
+			<button type="submit" class="btn btn-{{ session['bgpic'] }} btn-sm"><img src="static/img/id_sort.png"></button></a>
+		{% else %}
+			<a href="/sort_news/title" title="Отсортировать по дате">
+			<button type="submit" class="btn btn-{{ session['bgpic'] }} btn-sm"><img src="static/img/title_sort.png"></button></a>
+		{% endif %}
+		{% if session["reverse"]%}
+			<a href="/sort_news/straight" title="Сортировать по убыванию">
+			<button type="submit" class="btn btn-{{ session['bgpic'] }} btn-sm"><img src="static/img/dec_ord.png"></button></a>
+		{% else %}
+			<a href="/sort_news/reverse" title="Сортировать по возрастанию">
+			<button type="submit" class="btn btn-{{ session['bgpic'] }} btn-sm"><img src="static/img/inc_ord.png"></button></a>
+		{% endif %}
+	</div>
+	{% for item in news %}
+		<div class="alert alert-{{ item.bgpic }}" role="alert">
+			<h2>{{item.title}}</h2>
+			<div class="container">
+				<div class="row justify-content-between">
+					<div><a href="/show_news/{{item.id}}">Показать новость</a></div>
+					<div>Автор: <a href="/{{item.user_id}}">{{ item.user_name }}</a></div>
+					<div>Дата: {{ item.date }}</div>
+				</div>
+			</div>
+		</div>
+	{% endfor %}
+{% endblock %}

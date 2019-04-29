@@ -1,59 +1,134 @@
 <!doctype html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <title>{{ title }}</title>
-</head>
-    <body background="static/img/background.png">
-      <div class="header">
-      <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        {% if session["logo"] %}
-        <img src="static/img/{{session["logo"]}}_logo.png" width="64" height="64">
-        {% else %}
-        <img src="static/img/D_logo.png" width="64" height="64">
-        {% endif %}
-        <a class="navbar-brand" href="#">Zaicol Book</a>
-        <div class="collapse navbar-collapse">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-                <a class="nav-link" href="/index">Главная<span class="sr-only">(current)</span></a>
-            </li>
-            <li class="nav-item active">
-                <a class="nav-link" href="/news">Новости<span class="sr-only">(current)</span></a>
-            </li>
-        </ul>
-        <ul class="navbar-nav ml-auto">
-            <li class="nav-item active">
-                {% if "username" in session %}
-                    {% if session["username"] == "admin" %}
-                        <a class="nav-link" href="/shutdown">Выключение<span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="nav-item active">
-                        <a class="nav-link" href="/user_list">Список пользователей<span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="nav-item active">
-                    {% endif %}
-                    <li class="nav-item active">
-                        <img src={{ session["pic"] }} width="64" height="64">
-                    </li>
-                    <li class="nav-item active">
-                    <a class="nav-link" href="/{{session["user_id"]}}">{{session['username']}}<span class="sr-only">(current)</span></a></li>
-                    <li class="nav-item active">
-                    <a class="nav-link" href="/logout">Выход<span class="sr-only">(current)</span></a></li>
-                {% else %}
-                    <a class="nav-link" href="/register">Регистрация<span class="sr-only">(current)</span></a>
-                    <a class="nav-link" href="/login">Авторизация<span class="sr-only">(current)</span></a>
-                {% endif %}
-            </li>
-        </ul>
-        </div>
-      </nav>
-    </div>
-    <!-- Begin page content -->
-    <main role="main" class="container">
-        {% block content %}{% endblock %}
-    </main>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+        <title>{{ title }}</title>
+        <style>
+        * {
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        margin: 0;
+        outline: none;
+        }
+        body {
+        background-image: url("static/img/{{session["logo"]}}_background.jpg");
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+        height: 100%;
+        font-family: 'Arial', sans-serif;
+        }
+        .bord {
+        height: 100%;
+        min-height: 100%;
+        margin: 0;
+        padding-top: 4.5rem;
+        background-color: rgba(255, 255, 255, 0.5);
+        }
+        .incontent {
+        margin: 20px 7vw 0px;
+        height: 100%;
+        opacity: 1.0;
+        }
+        .l-footer {
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        max-width: inherit;
+        padding: 0 1rem;
+        margin: auto;
+        text-align: center;
+        background-color: rgba(255, 255, 255, 0.5);
+        vertical-align: bottom;
+        }
+        .l-footer .links {
+        clear: both;
+        display: inline-block;
+        padding: .5rem 0;
+        font: inherit;
+        font-size: .75rem;
+        line-height: 1rem;
+        text-align: center;
+        }
+        .note {
+        margin: 0px 4em;
+        color: rgb(150, 150, 150);
+        }
+        .links a {
+        margin-right: 15px;
+        }
+        .links#end {
+        margin-right: 0px;
+        }
+        #im-link{
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+        .n-link{
+            margin-top: 13px
+        }
+        .navbar#fixed-navbar {
+            max-height: 70px
+        }
+        </style>
+    </head>
+    <body id="body">
+        <main role="main" class="container" id="mainer">
+            <nav class="navbar navbar-expand-lg navbar-dark bg-{{ session['bgpic'] }} fixed-top" id="fixed-navbar">
+                <a class="navbar-brand" href="#">
+                    <img src="static/img/{{session['logo']}}_logo.png" width="50" height="50">
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+                <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="collapsibleNavbar">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item active n-link">
+                            <a class="nav-link" href="/index">Главная<span class="sr-only">(current)</span></a>
+                        </li>
+                        {% if "username" in session %}
+                            {% if session["username"] == "admin" %}
+                                <li class="nav-item active n-link">
+                                    <a class="nav-link" href="/admin">Админские штучки<span class="sr-only">(current)</span></a>
+                                </li>
+                            {% endif %}
+                            <li class="nav-item active">
+                                <a class="nav-link" href="/wid{{session['user_id']}}">
+                                    <img src="{{ session['pic'] }}" width="50" height="50">
+                                    {{session['username']}}<span class="sr-only">(current)</span>
+                                </a>
+                            </li>
+                            <li class="nav-item active n-link">
+                                <a class="nav-link" href="/logout">Выход<span class="sr-only">(current)</span></a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item active n-link">
+                                <a class="nav-link" href="/register">Регистрация<span class="sr-only">(current)</span></a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </nav>
+            <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+            {% block space %}{% endblock %}
+            <div class="bord" id="mainbord">
+                <div class="incontent">
+                    {% block content %}{% endblock %}
+                </div>
+                <footer class="l-footer">
+                    <div class="links">
+                        <a href="mailto:ilyaily2003@gmail.com">Написать нам</a>
+                        <a href="/terms">Пользовательское соглашение</a>
+                        <a href="/sitemap" id="end">Карта сайта</a>
+                    </div>
+                </footer>
+            </div>
+        </main>
     </body>
 </html>

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+	<style>
+		li {
+	    display: list-item;
+	    text-align: -webkit-match-parent;
+		}
+		.b-list li + li {
+	    margin: .5rem 0 0 0;
+		}
+		.b-link{
+	    color: #5782f0;
+	    border-bottom-color: rgba(87, 130, 240, 0.3);
+		}
+		a {
+    	background: transparent;
+		}
+		.b-list li {
+	    margin: 0;
+	    line-height: 1.5;
+	    list-style-type: disc;
+	    list-style-image: none;
+		}
+		.cc-2 {
+		position: relative;
+		min-height: 100%;
+		font-size: 16px;
+		font-weight: 400;
+		line-height: 1.25;
+		overflow-x: hidden;
+		}
+	</style>
+	<h1>Карта сайта</h1>
+	<div class="cc-2">
+		<div class="c-column">
+			<div class="subheadline">Общее</div>
+			<ul class="block b-list">
+				<li>
+					<a class="b-link" href="/index" title="Главная">Главная</a>
+				</li>
+				<li>
+					<a class="b-link" href="/user_list" title="Список пользователей">Список пользователей</a>
+				</li>
+			</ul>
+		</div>
+		<div class="c-column">
+			<div class="subheadline">Настройки пользователя</div>
+			<ul class="block b-list">
+				<li>
+					<a class="b-link" href="/settings" title="Настройки">Настройки</a>
+				</li>
+				<li>
+					<a class="b-link" href="/hidden" title="Спрятанные новости">Спрятанные новости</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+{% endblock %}

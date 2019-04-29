@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+	<h1>Настройки профиля</h1>
+	<style>
+		hr {
+			border:none;
+			background: rgba(100, 100, 100, 0.7);
+			height: 0.2em;
+		}
+	</style>
+    <hr>
+    <form action="" method="post" enctype="multipart/form-data" novalidate>
+        {{ av_form.hidden_tag() }}
+        <h2>Сменить аватар<h2>
+        <p>
+            <h4>{{ av_form.avatar.label }}</h4>
+            {{ av_form.avatar }}<br>
+            {% for error in av_form.avatar.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+		<img src="{{ pic }}" id="avatar_preview" width="200px" height="200px">
+		<img src="{{ pic }}" id="avatar_preview_small" width="50px" height="50px">
+    	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
+		<script type="text/javascript">
+		    function readURL(input) {
+		        if (input.files && input.files[0]) {
+		            var reader = new FileReader();
+		            
+		            reader.onload = function (e) {
+		                $('#avatar_preview').attr('src', e.target.result);
+		                $('#avatar_preview_small').attr('src', e.target.result);
+		            }
+		            reader.readAsDataURL(input.files[0]);
+		        }
+		    }
+		    $("#avatar").change(function(){
+		        readURL(this);
+		    });
+		</script>
+        </p>
+        <p>{{ av_form.submit() }}</p>
+    </form>
+    <hr>
+    <form action="" method="post" enctype="multipart/form-data" novalidate>
+        {{ us_form.hidden_tag() }}
+        <h2>Изменить логин<h2>
+        <p>
+            <h4>{{ us_form.new_name.label }}</h4>
+            {{ us_form.new_name }}<br>
+            {% for error in us_form.new_name.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+	        {% endfor %}
+        </p>
+        <p>{{ us_form.submit() }}</p>
+    </form>
+    <hr>
+    <form action="" method="post" enctype="multipart/form-data" novalidate>
+        {{ pass_form.hidden_tag() }}
+        <h2>Обновить пароль<h2>
+        <p>
+            <h4>{{ pass_form.old_pass.label }}</h4>
+            {{ pass_form.old_pass }}<br>
+            {% for error in pass_form.old_pass.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+	        {% endfor %}
+        </p>
+        <p>
+            <h4>{{ pass_form.password.label }}</h4>
+            {{ pass_form.password }}<br>
+            {% for error in pass_form.password.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+	        {% endfor %}
+        </p>
+        <p>
+            <h4>{{ pass_form.password_rep.label }}</h4>
+            {{ pass_form.password_rep }}<br>
+            {% for error in pass_form.password_rep.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+	        {% endfor %}
+        </p>
+        <p>{{ pass_form.submit() }}</p>
+    </form>
+    <hr>
+{% endblock %}

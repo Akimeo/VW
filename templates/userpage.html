@@ -1,28 +1,77 @@
 {% extends "base.html" %}
-
 {% block content %}
-  <div><img src={{pic}} width="250" height="250"></div>
-  <h1>{{ session[["username"]] }}</h1>
-	  {% if session["news_sort_type"]%}
-	  <a href="/sort_news/id">
-	  <button type="submit" class="btn btn-primary btn-sm">Отсортировать по алфавиту</button></a>
-	  {% else %}
-	  <a href="/sort_news/title">
-	  <button type="submit" class="btn btn-primary btn-sm">Отсортировать по дате</button></a>
-	  {% endif %}
-	  {% if session["reverse"]%}
-	  <a href="/sort_news/straight">
-	  <button type="submit" class="btn btn-primary btn-sm">Сортировать по возрастанию</button></a>
-	  {% else %}
-	  <a href="/sort_news/reverse">
-	  <button type="submit" class="btn btn-primary btn-sm">Сортировать по убыванию</button></a>
-	  {% endif %}
-  <a href="/add_news">Добавить новость</a>
+	<style>
+		.indexButton{
+			margin: 10px 0px;
+		}
+		.fullProfile{
+			margin:15px;
+		}
+		.profileDiv{
+			background-color: rgba(255, 255, 255, 0.8)
+		}
+		.profileData{
+			margin: 15px;
+			opacity: 1.0;
+		}
+		#sets{
+			float: center;
+			margin: 5px;
+		}
+	</style>
+	<div class="fullProfile">
+		<div class="container">
+			<div class="row" align="left">
+				<div class="col-md-auto">
+					<a href="/avatar/{{ user.id }}"><img src={{pic}} width="200" height="200"></a>
+					{% if add_allowed %}
+					<div class="row" align="center" id="sets">
+						<a href="/settings"><img src="static/img/settings.png" width="40" height="40"></a>
+						<a href="/hidden"><img src="static/img/hidden.png" width="40" height="40"></a>
+					</div>
+					{% endif %}
+				</div>
+				<div class="col">
+					<div class="profileDiv">
+						<div class="profileData">
+							<h3>{{ user.user_name }}</h3>
+							<p>Дата регистрации: {{ regdate }}<br>Фракция: {{ user.fraction }}<br>Новостей: {{newslen}}</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<h1>{{ session[["username"]] }}</h1>
+	<div class="indexButton" align="center">
+		{% if add_allowed %}
+			<a href="/add_news?from=/wid{{ user.id }}" title="Создать новость"><button type="submit" class="btn btn-{{ session['bgpic'] }} btn-sm"><img src="static/img/add_news.png"></button></a>
+		{% endif %}
+		{% if session["news_sort_type"]%}
+			<a href="/sort_news/id?from=/wid{{ user.id }}" title="Отсортировать по алфавиту">
+			<button type="submit" class="btn btn-{{ session['bgpic'] }} btn-sm"><img src="static/img/id_sort.png"></button></a>
+		{% else %}
+			<a href="/sort_news/title?from=/wid{{ user.id }}" title="Отсортировать по дате">
+			<button type="submit" class="btn btn-{{ session['bgpic'] }} btn-sm"><img src="static/img/title_sort.png"></button></a>
+		{% endif %}
+		{% if session["reverse"]%}
+			<a href="/sort_news/straight?from=/wid{{ user.id }}" title="Сортировать по убыванию">
+			<button type="submit" class="btn btn-{{ session['bgpic'] }} btn-sm"><img src="static/img/dec_ord.png"></button></a>
+		{% else %}
+			<a href="/sort_news/reverse?from=/wid{{ user.id }}" title="Сортировать по возрастанию">
+			<button type="submit" class="btn btn-{{ session['bgpic'] }} btn-sm"><img src="static/img/inc_ord.png"></button></a>
+		{% endif %}
+	</div>
 	{% for item in news %}
-    <div class="alert alert-dark" role="alert">
-        <h2>{{item.title}}</h2>
-        <div>{{item.content}}</div>
-        <a href="/delete_news/{{item.id}}">Удалить новость</a>
-    </div>
+		<div class="alert alert-{{ item.bgpic }}" role="alert">
+			<h2>{{item.title}}</h2>
+			<div>{{item.content}}</div>
+			<div class="container">
+				<div class="row justify-content-between">
+					<div><a href="/{{ nl[item.id]['link'] }}/{{item.id}}?from=/wid{{ user.id }}">{{nl[item.id]["desc"]}}</a></div>
+					<div>Дата: {{ item.date }}</div>
+				</div>
+			</div>
+		</div>
 	{% endfor %}
 {% endblock %}
