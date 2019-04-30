@@ -13,6 +13,7 @@
         {{ av_form.hidden_tag() }}
         <h2>Сменить аватар<h2>
         <p>
+        	<div class="note">Максимальный размер изображения: 4 МБайта</div>
             <h4>{{ av_form.avatar.label }}</h4>
             {{ av_form.avatar }}<br>
             {% for error in av_form.avatar.errors %}
@@ -40,7 +41,7 @@
 		    });
 		</script>
         </p>
-        <p>{{ av_form.submit() }}</p>
+        <p>{{ av_form.submit_av() }}</p>
     </form>
     <hr>
     <form action="" method="post" enctype="multipart/form-data" novalidate>
@@ -55,7 +56,7 @@
                 </div>
 	        {% endfor %}
         </p>
-        <p>{{ us_form.submit() }}</p>
+        <p>{{ us_form.submit_us() }}</p>
     </form>
     <hr>
     <form action="" method="post" enctype="multipart/form-data" novalidate>
@@ -88,7 +89,7 @@
                 </div>
 	        {% endfor %}
         </p>
-        <p>{{ pass_form.submit() }}</p>
+        <p>{{ pass_form.submit_pass() }}</p>
     </form>
     <hr>
 {% endblock %}

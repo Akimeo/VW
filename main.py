@@ -4,7 +4,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_wtf import FlaskForm
 from wtforms import (StringField, PasswordField, BooleanField, SubmitField,
                      SelectField, TextAreaField)
-from wtforms.validators import DataRequired, ValidationError
+from wtforms.validators import (DataRequired, ValidationError, EqualTo,
+                                StopValidation)
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from os.path import join, exists, abspath, dirname
 from datetime import datetime
@@ -20,6 +21,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///vwb.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = '/static/img'
 apath = dirname(abspath(__file__))
+forbidden_names = ['admin', 'default', 'Zaicol']
+MAX_FILE_SIZE = 1024 * 1024 * 8 * 4 + 1
 fracs = {
     'Альянс': 'A', 'Орда': 'H'
 }
@@ -53,11 +56,6 @@ def name_check(form, field):
         raise ValidationError('Пользователь с таким логином уже существует')
 
 
-def pasRep_check(form, field):
-    if form.password.data != form.password_rep.data:
-        raise ValidationError('Пароли не совпадают')
-
-
 class RegistrationForm(FlaskForm):
     username = StringField('Логин', validators=[
                            DataRequired('Заполните это поле'), name_check])
@@ -67,18 +65,11 @@ class RegistrationForm(FlaskForm):
     password_rep = PasswordField('Подтверждение пароля',
                                  validators=[
                                      DataRequired('Заполните это поле'),
-                                     pasRep_check])
+                                     EqualTo('password', 'Пароли не совпадают')
+                                 ])
     fraction = SelectField('Фракция', choices=[(
         None, "-"), ("Альянс", "Альянс"), ("Орда", "Орда")])
     submit = SubmitField('Зарегистрироваться')
-
-
-class AvatarForm(FlaskForm):
-    avatar = FileField('Новый аватар', validators=[
-                       FileRequired('Необходимо выбрать файл'),
-                       FileAllowed(['jpg', 'png', 'gif'],
-                                   'Расширение файла не является допустимым')])
-    submit = SubmitField('Сохранить')
 
 
 class AddNewsForm(FlaskForm):
@@ -89,33 +80,52 @@ class AddNewsForm(FlaskForm):
     submit = SubmitField('Добавить')
 
 
+def size_check(form, field):
+    file = field.data
+    file_bytes = file.read(MAX_FILE_SIZE)
+    if len(file_bytes) == MAX_FILE_SIZE:
+        raise StopValidation('Превышен максиммальный размер файла')
+
+
+class AvatarForm(FlaskForm):
+    avatar = FileField('Новый аватар', validators=[
+                       FileRequired('Необходимо выбрать файл'),
+                       FileAllowed(['jpg', 'png', 'gif'],
+                                   'Расширение файла не является допустимым'),
+                       size_check])
+    submit_av = SubmitField('Сохранить')
+
+
 def exist_check(form, field):
     if UsersModel.query.filter_by(user_name=field.data).first():
         raise ValidationError('Пользователь с таким логином уже существует')
+    elif field.data in forbidden_names and session['user_id'] != 1:
+        raise ValidationError('Использование данного имени запрещено')
 
 
 class ChangeUsernameForm(FlaskForm):
     new_name = StringField('Новый логин', validators=[
                            DataRequired('Введите новый логин'),
                            exist_check])
-    submit = SubmitField('Сохранить')
+    submit_us = SubmitField('Сохранить')
 
 
 def oldpass_check(form, field):
     user = UsersModel.query.filter_by(id=session["user_id"]).first()
     if not check_password_hash(user.password_hash, field.data):
-        raise AssertionError('Неверный пароль')
+        raise ValidationError('Неверный пароль')
 
 
 class ChangePasswordForm(FlaskForm):
-    old_pass = StringField('Старый пароль', validators=[
-                           DataRequired('Введите старый пароль'),
-                           oldpass_check])
-    password = StringField('Новый пароль', validators=[
-                           DataRequired('Введите новый пароль')])
-    password_rep = StringField('Подтверждение пароля', validators=[
-        DataRequired('Повторно введите новый пароль'), pasRep_check])
-    submit = SubmitField('Сохранить')
+    old_pass = PasswordField('Старый пароль', validators=[
+        DataRequired('Введите старый пароль'),
+        oldpass_check])
+    password = PasswordField('Новый пароль', validators=[
+        DataRequired('Введите новый пароль')])
+    password_rep = PasswordField('Подтверждение пароля', validators=[
+        DataRequired('Повторно введите новый пароль'),
+        EqualTo('password', 'Пароли не совпадают')])
+    submit_pass = SubmitField('Сохранить')
 
 
 class UsersModel(db.Model):
@@ -280,49 +290,6 @@ def avatar(user_id):
     return send_file(avat)
 
 
-@app.route('/settings', methods=['GET', 'POST'])
-def settings():
-    if 'username' not in session:
-        return redirect('/login')
-    av_form = AvatarForm()
-    us_form = ChangeUsernameForm()
-    pass_form = ChangePasswordForm()
-    user = UsersModel.query.filter_by(id=session["user_id"]).first()
-    pic = getAvat(user, user.av_type)
-    if av_form.validate_on_submit():
-        f = av_form.avatar.data
-        user = UsersModel.query.filter_by(id=session["user_id"]).first()
-        if f.filename.split('.')[-1] == 'gif':
-            fnm = 'static/img/' + str(session["user_id"]) + "_av.gif"
-            user.av_type = 'gif'
-        else:
-            fnm = 'static/img/' + str(session["user_id"]) + "_av.png"
-            user.av_type = 'png'
-        f.save(join(apath, fnm))
-        db.session.commit()
-        session["pic"] = getAvat(user, user.av_type)
-        return redirect('/settings')
-    if us_form.validate_on_submit():
-        user.user_name = us_form.new_name.data
-        session["username"] = us_form.new_name.data
-        db.session.commit()
-        return redirect('/settings')
-    if pass_form.validate_on_submit():
-        user.password_hash = generate_password_hash(pass_form.password.data)
-        db.session.commit()
-        return redirect('/settings')
-    logging.debug(pass_form.submit.data)
-    return render_template('settings.html', title='Настройки', av_form=av_form,
-                           us_form=us_form, pass_form=pass_form, pic=pic)
-
-
-@app.route('/sitemap', methods=['GET'])
-def sitemap():
-    if 'username' not in session:
-        return redirect('/login')
-    return render_template('sitemap.html', title='Карта сайта')
-
-
 @app.route('/add_news', methods=['GET', 'POST'])
 def add_news():
     if 'username' not in session:
@@ -345,54 +312,43 @@ def add_news():
                            form=form, username=session['username'])
 
 
-@app.route('/hide_news/<int:news_id>', methods=['GET'])
-def hide_news(news_id):
+@app.route('/addtoguild/<int:user_id>', methods=['GET'])
+def addtoguild(user_id):
     if 'username' not in session:
         return redirect('/login')
+    if user_id == 0 or user_id == session["user_id"]:
+        return redirect('/wid0')
     retpage = request.args.get('from', '/index')
+    us_add = UsersModel.query.filter_by(id=user_id).first()
+    if not us_add:
+        return redirect('/wid0')
     user = UsersModel.query.filter_by(id=session["user_id"]).first()
-    logging.debug(user.user_name)
-    if user.hdp:
-        user.hdp = loads(user.hdp) + [news_id]
-    else:
-        user.hdp = [news_id]
-    user.hdp = dumps(list(set(user.hdp)))
-    logging.debug(user.hdp)
-    db.session.commit()
+    if user.fraction == us_add.fraction:
+        user.coguild = dumps(list(set(loads(user.coguild) + [user_id])))
+        us_add.coguild = dumps(list(set(loads(us_add.coguild) + [user.id])))
+        db.session.commit()
     return redirect(retpage)
 
 
-@app.route('/show_news/<int:news_id>', methods=['GET'])
-def show_news(news_id):
+@app.route('/removefromguild/<int:user_id>', methods=['GET'])
+def removefromguild(user_id):
     if 'username' not in session:
         return redirect('/login')
-    user = UsersModel.query.filter_by(id=session["user_id"]).first()
-    if user.hdp:
-        try:
-            user.hdp = loads(user.hdp)
-            user.hdp.remove(news_id)
-        except Exception:
-            pass
-    else:
-        user.hdp = []
-    user.hdp = dumps(list(set(user.hdp)))
-    db.session.commit()
-    return redirect('/hidden')
-
-
-@app.route('/sort_news/<sort_type>', methods=['GET'])
-def sort_news(sort_type):
-    if 'username' not in session:
-        return redirect('/login')
+    if user_id == 0 or user_id == session["user_id"]:
+        return redirect('/wid0')
     retpage = request.args.get('from', '/index')
-    if sort_type == "title":
-        session['news_sort_type'] = True
-    elif sort_type == "id":
-        session['news_sort_type'] = False
-    elif sort_type == "straight":
-        session['reverse'] = False
-    elif sort_type == "reverse":
-        session['reverse'] = True
+    us_add = UsersModel.query.filter_by(id=user_id).first()
+    if not us_add:
+        return redirect('/wid0')
+    user = UsersModel.query.filter_by(id=session["user_id"]).first()
+    us_cg = loads(user.coguild)
+    us_add_cd = loads(us_add.coguild)
+    if user_id in us_cg:
+        us_cg.remove(user_id)
+        us_add_cd.remove(user.id)
+        user.coguild = dumps(us_cg)
+        us_add.coguild = dumps(us_add_cd)
+        db.session.commit()
     return redirect(retpage)
 
 
@@ -414,15 +370,21 @@ def delete_news(news_id):
     return redirect(retpage)
 
 
-@app.route('/user_list')
-def user_list():
+@app.route('/hide_news/<int:news_id>', methods=['GET'])
+def hide_news(news_id):
     if 'username' not in session:
         return redirect('/login')
-    data = list(map(lambda x: [x.user_name, x.id, x.fraction, str(len(
-        NewsModel.query.filter_by(user_id=x.id).all()))],
-        UsersModel.query.all()))
-    return render_template(
-        'user_list.html', title='Информация о пользователях', data=data)
+    retpage = request.args.get('from', '/index')
+    user = UsersModel.query.filter_by(id=session["user_id"]).first()
+    logging.debug(user.user_name)
+    if user.hdp:
+        user.hdp = loads(user.hdp) + [news_id]
+    else:
+        user.hdp = [news_id]
+    user.hdp = dumps(list(set(user.hdp)))
+    logging.debug(user.hdp)
+    db.session.commit()
+    return redirect(retpage)
 
 
 @app.route('/hidden')
@@ -436,6 +398,108 @@ def hidden():
         news=news, lenNews=lenNews)
 
 
+@app.route('/wid<int:user_id>', methods=['GET'])
+def selfPage(user_id):
+    if 'username' not in session:
+        return redirect('/login')
+    user = UsersModel.query.filter_by(id=session["user_id"]).first()
+    if user_id == 0 and "user_id" in session:
+        user_s = user
+    else:
+        user_s = UsersModel.query.filter_by(id=user_id).first()
+        if not user_s:
+            return redirect('/index')
+    gld = loads(user.coguild)
+    guilded = (user_id in gld)
+    guildLen = len(gld)
+    regdate = str(user_s.regdate).split('.')[0]
+    pic = getAvat(user_s, user_s.av_type)
+    news, nl = getNews(user_s.id)
+    return render_template(
+        "userpage.html",
+        title="Страница пользователя " + user_s.user_name,
+        pic=pic, news=news, nl=nl, user=user_s, newslen=len(news),
+        regdate=regdate, add_allowed=(user_id == session["user_id"]),
+        samefrac=(user.fraction == user_s.fraction), guilded=guilded,
+        guildLen=guildLen)
+
+
+@app.route('/settings', methods=['GET', 'POST'])
+def settings():
+    if 'username' not in session:
+        return redirect('/login')
+    av_form = AvatarForm()
+    us_form = ChangeUsernameForm()
+    pass_form = ChangePasswordForm()
+    user = UsersModel.query.filter_by(id=session["user_id"]).first()
+    pic = getAvat(user, user.av_type)
+    if av_form.submit_av.data and av_form.validate_on_submit():
+        f = av_form.avatar.data
+        user = UsersModel.query.filter_by(id=session["user_id"]).first()
+        if f.filename.split('.')[-1] == 'gif':
+            fnm = 'static/img/' + str(session["user_id"]) + "_av.gif"
+            user.av_type = 'gif'
+        else:
+            fnm = 'static/img/' + str(session["user_id"]) + "_av.png"
+            user.av_type = 'png'
+        f.save(join(apath, fnm))
+        db.session.commit()
+        session["pic"] = getAvat(user, user.av_type)
+        return redirect('/settings')
+    if us_form.submit_us.data and us_form.validate_on_submit():
+        user.user_name = us_form.new_name.data
+        session["username"] = us_form.new_name.data
+        db.session.commit()
+        return redirect('/settings')
+    if pass_form.submit_pass.data and pass_form.validate_on_submit():
+        user.password_hash = generate_password_hash(pass_form.password.data)
+        db.session.commit()
+        return redirect('/settings')
+    return render_template('settings.html', title='Настройки', av_form=av_form,
+                           us_form=us_form, pass_form=pass_form, pic=pic)
+
+
+@app.route('/show_news/<int:news_id>', methods=['GET'])
+def show_news(news_id):
+    if 'username' not in session:
+        return redirect('/login')
+    user = UsersModel.query.filter_by(id=session["user_id"]).first()
+    if user.hdp:
+        try:
+            user.hdp = loads(user.hdp)
+            user.hdp.remove(news_id)
+        except Exception:
+            pass
+    else:
+        user.hdp = []
+    user.hdp = dumps(list(set(user.hdp)))
+    db.session.commit()
+    return redirect('/hidden')
+
+
+@app.route('/sitemap', methods=['GET'])
+def sitemap():
+    if 'username' not in session:
+        return redirect('/login')
+    return render_template('sitemap.html', title='Карта сайта')
+
+
+@app.route('/sort_news/<sort_type>', methods=['GET'])
+def sort_news(sort_type):
+    if 'username' not in session:
+        return redirect('/login')
+    retpage = request.args.get('from', '/index')
+    if sort_type == "title":
+        session['news_sort_type'] = True
+    elif sort_type == "id":
+        session['news_sort_type'] = False
+    elif sort_type == "straight":
+        session['reverse'] = False
+    elif sort_type == "reverse":
+        session['reverse'] = True
+    return redirect(retpage)
+
+
 @app.route('/terms')
 def terms():
     if 'username' not in session:
@@ -444,43 +508,34 @@ def terms():
         'terms.html', title='Пользователькое соглашение')
 
 
-@app.route('/wid<int:user_id>', methods=['GET'])
-def selfPage(user_id):
+@app.route('/user_list')
+def user_list():
     if 'username' not in session:
         return redirect('/login')
-    if user_id == 0 and "user_id" in session:
-        user = UsersModel.query.filter_by(id=session["user_id"]).first()
-    else:
-        user = UsersModel.query.filter_by(id=user_id).first()
-        if not user:
-            return redirect('/index')
-    regdate = str(user.regdate).split('.')[0]
-    pic = getAvat(user, user.av_type)
-    news, nl = getNews(user.id)
+    data = list(map(lambda x: [x.user_name, x.id, x.fraction, str(len(
+        NewsModel.query.filter_by(user_id=x.id).all()))],
+        UsersModel.query.all()))
     return render_template(
-        "userpage.html",
-        title="Страница пользователя " + user.user_name,
-        pic=pic, news=news, nl=nl, user=user, newslen=len(news),
-        regdate=regdate, add_allowed=(user_id == session["user_id"]))
+        'user_list.html', title='Информация о пользователях', data=data)
 
 
-@app.route('/addtoguild/<int:user_id>', methods=['GET'])
-def addtoguild(user_id):
+@app.route('/guild')
+def guild():
     if 'username' not in session:
         return redirect('/login')
-    if user_id == 0 or user_id == session["user_id"]:
-        return redirect('/wid0')
-    user_add = UsersModel.query.filter_by(id=user_id).first()
-    if not user:
-        return redirect('/index')
-    regdate = str(user.regdate).split('.')[0]
-    pic = getAvat(user, user.av_type)
-    news, nl = getNews(user.id)
+    cgls = loads(UsersModel.query.filter_by(
+        id=session["user_id"]).first().coguild)
+    cglslist = []
+    nl = {}
+    for idd in cgls:
+        us = UsersModel.query.filter_by(id=idd).first()
+        cglslist.append(us)
+        nl[us] = str(len(NewsModel.query.filter_by(user_id=idd).all()))
+    data = list(map(lambda x: [x.user_name, x.id, str(len(loads(x.coguild))),
+                               nl[x]],
+                    cglslist))
     return render_template(
-        "userpage.html",
-        title="Страница пользователя " + user.user_name,
-        pic=pic, news=news, nl=nl, user=user, newslen=len(news),
-        regdate=regdate, add_allowed=(user_id == session["user_id"]))
+        'user_list.html', title='Информация о пользователях', data=data)
 
 
 @app.errorhandler(404)
@@ -510,5 +565,5 @@ def makeDefUsers(rest=False):
 
 
 if __name__ == '__main__':
-    makeDefUsers()
+    makeDefUsers(True)
     app.run(port=8000, host='127.0.0.1')

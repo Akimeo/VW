@@ -1,9 +1,4 @@
-from os.path import dirname, abspath, exists
+import flask_wtf.file
 
 
-a = dirname(abspath(__file__))
-print(a)
-print(abspath(dirname(__file__)))
-print(abspath(__file__))
-print(dirname(__file__))
-print(exists(a + '/static/img/admin_av.gif'))
+print(flask_wtf.file.__file__)

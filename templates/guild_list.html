@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+ 
+{% block content %}
+	<table class="table table-bordered">
+		<thead align="center">
+			<tr>
+				<th scope="col">Пользователь</th>
+				<th scope="col">Количество согильдийцев</th>
+				<th scope="col">Количество публикаций</th>
+			</tr>
+		</thead>
+		<tbody>
+		    {% for item in data %}
+			    <tr>
+					<td class="text-center"><a href="/wid{{item[1]}}">{{item[0]}}</a></td>
+					<td class="text-center">{{item[2]}}</td>
+					<td class="text-center">{{item[3]}}</td>
+			    </tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}
