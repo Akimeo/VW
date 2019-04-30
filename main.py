@@ -249,6 +249,8 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if "username" in session:
+        return redirect('/0')
     form = LoginForm()
     session["logo"] = "D"
     session['bgpic'] = "secondary"
